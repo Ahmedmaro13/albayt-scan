@@ -7,31 +7,24 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install Wine
-      run: |
-        sudo dpkg --add-architecture i386
-        sudo apt-get update
-        sudo apt-get install -y wine wine32 wine64 xvfb
-
-    - name: Download & Install Windows Python 3.8
-      run: |
-        curl -o python.exe https://www.python.org/ftp/python/3.8.10/python-3.8.10.exe
-        xvfb-run wine python.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
-        sleep 15
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.8'
 
     - name: Install dependencies
       run: |
-        xvfb-run wine python.exe -m pip install --upgrade pip
-        xvfb-run wine python.exe -m pip install -r requirements.txt
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
     - name: Build with PyInstaller
       run: |
-        xvfb-run wine python.exe -m PyInstaller ALBAYT_SCAN.spec --clean --noconfirm
+        pyinstaller ALBAYT_SCAN.spec --clean --noconfirm
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
